@@ -1,0 +1,83 @@
+# https://kubernetes.github.io/ingress-nginx/deploy/#quick-start
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: foowebapi-sa
+    namespace: k8sdemo-xplor
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: foowebapi-deployment
+    namespace: k8sdemo-xplor
+    labels:
+      app: foowebapi
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: foowebapi
+    template:
+      metadata:
+        namespace: k8sdemo-xplor
+        labels:
+          app: foowebapi
+      spec:
+        serviceAccount: foowebapi-sa
+        containers:
+        - name: foowebapi
+          image:  msdemo/foowebapi:latest
+          env:
+           - name: pathPrefix
+             value: /foo
+           - name: PORT
+             value: "8080"           
+           - name: barendpoint
+             value: http://barwebapi-service.k8sdemo-xplor.svc.cluster.local/api/KAuth
+
+          ports:
+          - containerPort: 80
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: "256M"
+              cpu: "0.5"
+            limits:
+              memory: "512M"
+              cpu: "1"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: foowebapi-service
+    namespace: k8sdemo-xplor
+  spec:
+    selector:
+      app: foowebapi
+    ports:
+      - name: tcp-port
+        port: 80
+        targetPort: 8080
+        protocol: TCP
+        
+- apiVersion:  networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: foowebapi-ingress 
+    namespace: k8sdemo-xplor
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: kubernetes.docker.internal
+      http:
+        paths:
+        - path: /foo
+          pathType: Prefix
+          backend:
+            service:
+              name: foowebapi-service 
+              port:
+                number: 80
+

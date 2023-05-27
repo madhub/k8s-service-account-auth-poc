@@ -1,0 +1,94 @@
+# https://kubernetes.github.io/ingress-nginx/deploy/#quick-start
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: barwebapi-sa
+    namespace: k8sdemo-xplor
+    
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: role-tokenreview-binding
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: system:auth-delegator
+  subjects:
+  - kind: ServiceAccount
+    name: barwebapi-sa
+    namespace: k8sdemo-xplor
+
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: barwebapi-deployment
+    namespace: k8sdemo-xplor
+    labels:
+      app: barwebapi
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: barwebapi
+    template:
+      metadata:
+        namespace: k8sdemo-xplor
+        labels:
+          app: barwebapi
+      spec:
+        serviceAccount: barwebapi-sa
+        containers:
+        - name: barwebapi
+          image:  msdemo/barwebapi:latest
+          env:
+           - name: pathPrefix
+             value: /bar
+           - name: PORT
+             value: "8080"                         
+          ports:
+          - containerPort: 80
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: "256M"
+              cpu: "0.5"
+            limits:
+              memory: "512M"
+              cpu: "1"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: barwebapi-service
+    namespace: k8sdemo-xplor
+  spec:
+    selector:
+      app: barwebapi
+    ports:
+      - name: tcp-port
+        port: 80
+        targetPort: 8080
+        protocol: TCP
+        
+- apiVersion:  networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: barwebapi-ingress 
+    namespace: k8sdemo-xplor
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: kubernetes.docker.internal
+      http:
+        paths:
+        - path: /bar
+          pathType: Prefix
+          backend:
+            service:
+              name: barwebapi-service 
+              port:
+                number: 80
+
