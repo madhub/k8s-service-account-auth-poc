@@ -2,6 +2,7 @@
 A demonstration applications to show the Authentication between microservices using Kubernetes identities
 
 ## Highlevel context overview
+![image](https://github.com/madhub/k8s-service-account-auth-poc/assets/8907962/b42183db-0d8e-4afb-898e-bdba751484fb)
 
 
 ### Project structure
