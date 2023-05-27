@@ -28,7 +28,7 @@ items:
         serviceAccount: foowebapi-sa
         containers:
         - name: foowebapi
-          image:  msdemo/foowebapi:latest
+          image:  k8sdemo/foowebapi:latest
           env:
            - name: pathPrefix
              value: /foo

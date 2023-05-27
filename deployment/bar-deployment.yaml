@@ -42,7 +42,7 @@ items:
         serviceAccount: barwebapi-sa
         containers:
         - name: barwebapi
-          image:  msdemo/barwebapi:latest
+          image:  k8sdemo/barwebapi:latest
           env:
            - name: pathPrefix
              value: /bar

@@ -24,9 +24,9 @@ public class DemoController : ControllerBase
     /// BarWebapi authenticate the token & returns username & pod details
     /// </summary>
     /// <returns></returns>
-    [HttpPost(Name = "invoke")]
-    [Route("invoke")]
-    public ActionResult Invoke()
+    [HttpPost]
+    [Route("callapi")]
+    public ActionResult callapi()
     {
         var barEndpoint = configuration.GetValue<string>("barendpoint");
         try
